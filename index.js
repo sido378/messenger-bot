@@ -19,7 +19,7 @@ class Bot extends EventEmitter {
     this.debug = opts.debug || false
   }
 
-  getProfile (id, cb) {
+  getProfile (id) {
     return request({
       method: 'GET',
       uri: `https://graph.facebook.com/v2.6/${id}`,
@@ -28,16 +28,14 @@ class Bot extends EventEmitter {
     })
     .then(body => {
       if (body.error) return Promise.reject(body.error)
-      if (!cb) return body
-      cb(null, body)
+      return body
     })
     .catch(err => {
-      if (!cb) return Promise.reject(err)
-      cb(err)
+      return Promise.reject(err)
     })
   }
 
-  sendMessage (recipient, payload, cb) {
+  sendMessage (recipient, payload) {
     return request({
       method: 'POST',
       uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -49,16 +47,34 @@ class Bot extends EventEmitter {
     })
     .then(body => {
       if (body.error) return Promise.reject(body.error)
-      if (!cb) return body
-      cb(null, body)
+      return body
     })
     .catch(err => {
-      if (!cb) return Promise.reject(err)
-      cb(err)
+      return Promise.reject(err)
     })
   }
 
-  sendSenderAction (recipient, senderAction, cb) {
+  sendSilentMessage (recipient, payload) {
+    return request({
+      method: 'POST',
+      uri: 'https://graph.facebook.com/v2.6/me/messages',
+      qs: this._getQs(),
+      json: {
+        recipient: { id: recipient },
+        message: payload,
+        notification_type: 'NO_PUSH'
+      }
+    })
+    .then(body => {
+      if (body.error) return Promise.reject(body.error)
+      return body
+    })
+    .catch(err => {
+      return Promise.reject(err)
+    })
+  }
+
+  sendSenderAction (recipient, senderAction) {
     return request({
       method: 'POST',
       uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -72,16 +88,14 @@ class Bot extends EventEmitter {
     })
     .then(body => {
       if (body.error) return Promise.reject(body.error)
-      if (!cb) return body
-      cb(null, body)
+      return body
     })
     .catch(err => {
-      if (!cb) return Promise.reject(err)
-      cb(err)
+      return Promise.reject(err)
     })
   }
 
-  setThreadSettings (threadState, callToActions, cb) {
+  setThreadSettings (threadState, callToActions) {
     return request({
       method: 'POST',
       uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
@@ -94,16 +108,14 @@ class Bot extends EventEmitter {
     })
     .then(body => {
       if (body.error) return Promise.reject(body.error)
-      if (!cb) return body
-      cb(null, body)
+      return body
     })
     .catch(err => {
-      if (!cb) return Promise.reject(err)
-      cb(err)
+      return Promise.reject(err)
     })
   }
 
-  removeThreadSettings (threadState, cb) {
+  removeThreadSettings (threadState) {
     return request({
       method: 'DELETE',
       uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
@@ -115,29 +127,27 @@ class Bot extends EventEmitter {
     })
     .then(body => {
       if (body.error) return Promise.reject(body.error)
-      if (!cb) return body
-      cb(null, body)
+      return body
     })
     .catch(err => {
-      if (!cb) return Promise.reject(err)
-      cb(err)
+      return Promise.reject(err)
     })
   }
 
-  setGetStartedButton (payload, cb) {
-    return this.setThreadSettings('new_thread', payload, cb)
+  setGetStartedButton (payload) {
+    return this.setThreadSettings('new_thread', payload)
   }
 
-  setPersistentMenu (payload, cb) {
-    return this.setThreadSettings('existing_thread', payload, cb)
+  setPersistentMenu (payload) {
+    return this.setThreadSettings('existing_thread', payload)
   }
 
-  removeGetStartedButton (cb) {
-    return this.removeThreadSettings('new_thread', cb)
+  removeGetStartedButton () {
+    return this.removeThreadSettings('new_thread')
   }
 
-  removePersistentMenu (cb) {
-    return this.removeThreadSettings('existing_thread', cb)
+  removePersistentMenu () {
+    return this.removeThreadSettings('existing_thread')
   }
 
   middleware () {
@@ -242,9 +252,9 @@ class Bot extends EventEmitter {
 
   _getActionsObject (event) {
     return {
-      setTyping: (typingState, cb) => {
+      setTyping: (typingState) => {
         let senderTypingAction = typingState ? 'typing_on' : 'typing_off'
-        this.sendSenderAction(event.sender.id, senderTypingAction, cb)
+        this.sendSenderAction(event.sender.id, senderTypingAction)
       },
       markRead: this.sendSenderAction.bind(this, event.sender.id, 'mark_seen')
     }
