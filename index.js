@@ -35,26 +35,7 @@ class Bot extends EventEmitter {
     })
   }
 
-  sendMessage (recipient, payload) {
-    return request({
-      method: 'POST',
-      uri: 'https://graph.facebook.com/v2.6/me/messages',
-      qs: this._getQs(),
-      json: {
-        recipient: { id: recipient },
-        message: payload
-      }
-    })
-    .then(body => {
-      if (body.error) return Promise.reject(body.error)
-      return body
-    })
-    .catch(err => {
-      return Promise.reject(err)
-    })
-  }
-
-  sendSilentMessage (recipient, payload) {
+  sendMessage (recipient, payload, notificationType = 'REGULAR') {
     return request({
       method: 'POST',
       uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -62,7 +43,7 @@ class Bot extends EventEmitter {
       json: {
         recipient: { id: recipient },
         message: payload,
-        notification_type: 'NO_PUSH'
+        notification_type: notificationType
       }
     })
     .then(body => {
