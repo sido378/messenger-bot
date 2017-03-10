@@ -55,6 +55,32 @@ class Bot extends EventEmitter {
     })
   }
 
+  uploadAttachment (url, type) {
+    return request({
+      method: 'POST',
+      uri: 'https://graph.facebook.com/v2.6/me/message_attachments',
+      qs: this._getQs(),
+      json: {
+        message: {
+          attachment: {
+            type,
+            payload: {
+              url,
+              is_reusable: true
+            }
+          }
+        },
+      }
+    })
+    .then(body => {
+      if (body.error) return Promise.reject(body.error)
+      return body
+    })
+    .catch(err => {
+      return Promise.reject(err)
+    })
+  };
+
   sendSenderAction (recipient, senderAction) {
     return request({
       method: 'POST',
