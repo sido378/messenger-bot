@@ -35,6 +35,22 @@ class Bot extends EventEmitter {
     })
   }
 
+  setProfile (profile) {
+    return request({
+      method: 'POST',
+      uri: 'https://graph.facebook.com/v2.6/me/messenger_profile',
+      qs: this._getQs(),
+      json: profile
+    })
+    .then(body => {
+      if (body.error) return Promise.reject(body.error)
+      return body
+    })
+    .catch(err => {
+      return Promise.reject(err)
+    })
+  }
+
   sendMessage (recipient, payload, notificationType = 'REGULAR') {
     return request({
       method: 'POST',
